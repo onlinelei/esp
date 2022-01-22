@@ -1,0 +1,1 @@
+void my_log(const String &message);
