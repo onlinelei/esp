@@ -52,6 +52,6 @@ void loop() {
 //    my_screen_printText(0, 220, 2, RANDOM_REG32, my_wifi_getIpAddr());
 
     delay(1000);
-    my_screen_fillScreen();
+//    my_screen_fillScreen();
 //    my_page_starField();
 }
