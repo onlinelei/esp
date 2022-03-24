@@ -58,3 +58,6 @@ dkms.conf
 /cmake-build-nodemcuv2/
 /.DS_Store
 /.idea/
+
+# submodule 
+/demo/
