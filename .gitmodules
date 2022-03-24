@@ -1,3 +1,6 @@
 [submodule "demo/smallDesktopDisplay"]
 	path = demo/smallDesktopDisplay
 	url = https://github.com/SmallDesktopDisplay-team/SmallDesktopDisplay.git
+[submodule "demo/ESP32-PicoDK"]
+	path = demo/ESP32-PicoDK
+	url = https://github.com/peng-zhihui/ESP32-PicoDK.git
