@@ -5,7 +5,7 @@
 # please create `CMakeListsUser.txt` in the root of project.
 # The `CMakeListsUser.txt` will not be overwritten by PlatformIO.
 
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.13)
 set(CMAKE_SYSTEM_NAME Generic)
 set(CMAKE_C_COMPILER_WORKS 1)
 set(CMAKE_CXX_COMPILER_WORKS 1)
@@ -13,25 +13,21 @@ set(CMAKE_CXX_COMPILER_WORKS 1)
 project("esp-8266" C CXX)
 
 include(CMakeListsPrivate.txt)
-include_directories("./.pio/libdeps/nodemcuv2/NTPClient/")
-include_directories("./.pio/libdeps/nodemcuv2/ESPDateTime/src")
-include_directories("./.pio/libdeps/nodemcuv2/ArduinoJson/src")
-include_directories("./.pio/libdeps/nodemcuv2/TFT_eSPI")
 
-if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsUser.txt)
-    include(CMakeListsUser.txt)
-endif ()
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/CMakeListsUser.txt)
+include(CMakeListsUser.txt)
+endif()
 
 add_custom_target(
-        Production ALL
-        COMMAND platformio -c clion run "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    Production ALL
+    COMMAND platformio -c clion run "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_custom_target(
-        Debug ALL
-        COMMAND platformio -c clion debug "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    Debug ALL
+    COMMAND platformio -c clion debug "$<$<NOT:$<CONFIG:All>>:-e${CMAKE_BUILD_TYPE}>"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_executable(Z_DUMMY_TARGET ${SRC_LIST})
