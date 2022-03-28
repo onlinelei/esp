@@ -24,8 +24,23 @@ void setup() {
     tft.setRotation(3);
     tft.fillScreen(TFT_BLACK);
     tft.setTextSize(1);
-    tft.setTextColor(TFT_WHITE);
+    tft.setTextColor(TFT_GREEN);
     tft.setCursor(0, 0);
+
+    // 开机显示
+    tft.fillScreen(TFT_BLACK);
+    tft.setTextSize(2);
+    tft.setTextColor(TFT_CYAN);
+    tft.setCursor(20, 12);
+    tft.println(F("Plant Carer"));
+
+    tft.setTextSize(1);
+    tft.setCursor(70, 60);
+    tft.setTextColor(TFT_BLUE);
+    tft.println(F("Version 1.0"));
+
+    delay(6000);
+    tft.fillScreen(TFT_BLACK);
 }
 
 
@@ -44,29 +59,18 @@ void loop() {
 //    delay(1000 * 1);
 //    digitalWrite(MOTOR_PIN, LOW);
 
-    // 更新屏幕
+
+
+    // 状态显示
     tft.setTextSize(2);
-    tft.setTextColor(TFT_WHITE);
-    tft.setCursor(40, 5);
-    tft.println(F("Arduino"));
-    tft.setCursor(1, 25);
-    tft.println(F("Cellular"));
-    tft.setCursor(1, 45);
-    tft.println(F("Automata"));
-
-
-    delay(1000);
-
-    tft.fillScreen(TFT_WHITE);
-
-    delay(1000);
-    tft.fillScreen(TFT_BLACK);
-
-    delay(1000);
-    tft.setCursor(0, 25);
-    tft.println(F("E"));
-
-    delay(1000);
+    tft.setCursor(0, 0);
+    tft.setTextColor(0x4810);
+    tft.println(F("Status:"));
+    tft.setCursor(0, 20);
+    tft.println(F("Count:"));
+    tft.setCursor(0, 40);
+    tft.println(F("Time:"));
+    delay(3000);
 
     // 休息时间
     delay(1000 * 2);
