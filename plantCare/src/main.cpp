@@ -20,7 +20,7 @@ void setup() {
 
     // 初始化屏幕
     //Set up the display
-    tft.init();
+    tft.begin();
     tft.setRotation(3);
     tft.fillScreen(TFT_BLACK);
     tft.setTextSize(1);
@@ -49,17 +49,24 @@ void loop() {
     tft.setTextColor(TFT_WHITE);
     tft.setCursor(40, 5);
     tft.println(F("Arduino"));
-    tft.setCursor(35, 25);
+    tft.setCursor(1, 25);
     tft.println(F("Cellular"));
-    tft.setCursor(35, 45);
+    tft.setCursor(1, 45);
     tft.println(F("Automata"));
+
 
     delay(1000);
 
+    tft.fillScreen(TFT_WHITE);
+
+    delay(1000);
     tft.fillScreen(TFT_BLACK);
 
+    delay(1000);
+    tft.setCursor(0, 25);
+    tft.println(F("E"));
 
-
+    delay(1000);
 
     // 休息时间
     delay(1000 * 2);

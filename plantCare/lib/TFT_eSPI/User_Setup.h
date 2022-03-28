@@ -75,10 +75,10 @@
 // #define M5STACK
 
 // For ST7789, ST7735, ILI9163 and GC9A01 ONLY, define the pixel width and height in portrait orientation
- #define TFT_WIDTH  100
+ #define TFT_WIDTH  106
 // #define TFT_WIDTH  128
 // #define TFT_WIDTH  240 // ST7789 240 x 240 and 240 x 320
- #define TFT_HEIGHT 160
+ #define TFT_HEIGHT 161
 // #define TFT_HEIGHT 128
 // #define TFT_HEIGHT 240 // ST7789 240 x 240
 // #define TFT_HEIGHT 320 // ST7789 240 x 320

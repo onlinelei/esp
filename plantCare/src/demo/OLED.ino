@@ -30,11 +30,11 @@
 //******************************************************************************/
 #include "font.h"
 
-int scl=8;//定义数字接口8
-int sda=9;//定义数字接口9
-int res=10;//定义数字接口10
-int dc=11;//定义数字接口11
-int cs=12;//定义数字接口12
+int scl=14;//定义数字接口8
+int sda=13;//定义数字接口9
+int res=2;//定义数字接口10
+int dc=4;//定义数字接口11
+int cs=0;//定义数字接口12
 
 #define OLED_SCLK_Clr() digitalWrite(scl,LOW)//SCL
 #define OLED_SCLK_Set() digitalWrite(scl,HIGH)
@@ -668,8 +668,3 @@ void LCD_ShowPicture(short int x1,short int y1,short int x2,short int y2)
     LCD_WR_DATA8(temp2);
   }     
 }
-
-
-
-
-
