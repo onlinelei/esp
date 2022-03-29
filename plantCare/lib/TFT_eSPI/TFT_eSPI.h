@@ -252,30 +252,30 @@ const PROGMEM fontinfo fontdata [] = {
 **                         Section 6: Colour enumeration
 ***************************************************************************************/
 // Default color definitions
-#define TFT_BLACK       0x0000      /*   0,   0,   0 */
-#define TFT_NAVY        0x000F      /*   0,   0, 128 */
-#define TFT_DARKGREEN   0x03E0      /*   0, 128,   0 */
-#define TFT_DARKCYAN    0x03EF      /*   0, 128, 128 */
-#define TFT_MAROON      0x7800      /* 128,   0,   0 */
-#define TFT_PURPLE      0x780F      /* 128,   0, 128 */
-#define TFT_OLIVE       0x7BE0      /* 128, 128,   0 */
-#define TFT_LIGHTGREY   0xD69A      /* 211, 211, 211 */
-#define TFT_DARKGREY    0x7BEF      /* 128, 128, 128 */
-#define TFT_BLUE        0x001F      /*   0,   0, 255 */
-#define TFT_GREEN       0x07E0      /*   0, 255,   0 */
-#define TFT_CYAN        0x07FF      /*   0, 255, 255 */
-#define TFT_RED         0xF800      /* 255,   0,   0 */
-#define TFT_MAGENTA     0xF81F      /* 255,   0, 255 */
-#define TFT_YELLOW      0xFFE0      /* 255, 255,   0 */
-#define TFT_WHITE       0xFFFF      /* 255, 255, 255 */
-#define TFT_ORANGE      0xFDA0      /* 255, 180,   0 */
-#define TFT_GREENYELLOW 0xB7E0      /* 180, 255,   0 */
-#define TFT_PINK        0xFE19      /* 255, 192, 203 */ //Lighter pink, was 0xFC9F      
-#define TFT_BROWN       0x9A60      /* 150,  75,   0 */
-#define TFT_GOLD        0xFEA0      /* 255, 215,   0 */
-#define TFT_SILVER      0xC618      /* 192, 192, 192 */
-#define TFT_SKYBLUE     0x867D      /* 135, 206, 235 */
-#define TFT_VIOLET      0x915C      /* 180,  46, 226 */
+#define TFT_BLACK       0x0000      /*    0,   0,   0  黑色的    */
+#define TFT_NAVY        0x000F      /*    0,   0, 128  海军    */
+#define TFT_DARKGREEN   0x03E0      /*    0, 128,   0  深绿色    */
+#define TFT_DARKCYAN    0x03EF      /*    0, 128, 128  深青色    */
+#define TFT_MAROON      0x7800      /*  128,   0,   0  栗色    */
+#define TFT_PURPLE      0x780F      /*  128,   0, 128  紫色的    */
+#define TFT_OLIVE       0x7BE0      /*  128, 128,   0  橄榄    */
+#define TFT_LIGHTGREY   0xD69A      /*  211, 211, 211  浅灰色    */
+#define TFT_DARKGREY    0x7BEF      /*  128, 128, 128  深灰色    */
+#define TFT_BLUE        0x001F      /*    0,   0, 255  蓝色    */
+#define TFT_GREEN       0x07E0      /*    0, 255,   0  绿色    */
+#define TFT_CYAN        0x07FF      /*    0, 255, 255  青色    */
+#define TFT_RED         0xF800      /*  255,   0,   0  红色的    */
+#define TFT_MAGENTA     0xF81F      /*  255,   0, 255  品红    */
+#define TFT_YELLOW      0xFFE0      /*  255, 255,   0  黄色的    */
+#define TFT_WHITE       0xFFFF      /*  255, 255, 255  白色的    */
+#define TFT_ORANGE      0xFDA0      /*  255, 180,   0  橘子    */
+#define TFT_GREENYELLOW 0xB7E0      /*  180, 255,   0  黄绿色    */
+#define TFT_PINK        0xFE19      /*  255, 192, 203  粉色的    */ //Lighter pink, was 0xFC9F
+#define TFT_BROWN       0x9A60      /*  150,  75,   0  棕色的    */
+#define TFT_GOLD        0xFEA0      /*  255, 215,   0  金子    */
+#define TFT_SILVER      0xC618      /*  192, 192, 192  银    */
+#define TFT_SKYBLUE     0x867D      /*  135, 206, 235  天蓝色    */
+#define TFT_VIOLET      0x915C      /*  180,  46, 226  紫色    */
 
 // Next is a special 16 bit colour value that encodes to 8 bits
 // and will then decode back to the same 16 bit value.

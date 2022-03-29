@@ -30,16 +30,23 @@ void setup() {
     // 开机显示
     tft.fillScreen(TFT_BLACK);
     tft.setTextSize(2);
-    tft.setTextColor(TFT_CYAN);
+    tft.setTextColor(TFT_GREEN);
     tft.setCursor(20, 12);
     tft.println(F("Plant Carer"));
 
     tft.setTextSize(1);
     tft.setCursor(70, 60);
-    tft.setTextColor(TFT_BLUE);
-    tft.println(F("Version 1.0"));
+    tft.setTextColor(TFT_DARKGREEN);
+    tft.println(F("Version: 1.0"));
 
-    delay(6000);
+    delay(300);
+
+    for (int i = 0; i < 60; ++i) {
+        tft.setCursor(10 + i * 2, 70);
+        tft.println(F("."));
+        delay(100);
+    }
+
     tft.fillScreen(TFT_BLACK);
 }
 
@@ -61,16 +68,37 @@ void loop() {
 
 
 
-    // 状态显示
+    // 状态显示界面1
+    tft.drawLine(0, 0, 0, 80, TFT_DARKCYAN);
+    tft.drawLine(0, 0, 159, 0, TFT_DARKCYAN);
+    tft.drawLine(159, 0, 159, 79, TFT_DARKCYAN);
+    tft.drawLine(0, 79, 159, 79, TFT_DARKCYAN);
+
+    tft.drawLine(0, 17, 159, 17, TFT_DARKCYAN);
+    tft.drawLine(0, 34, 159, 34, TFT_DARKCYAN);
+    tft.drawLine(0, 51, 159, 51, TFT_DARKCYAN);
+    tft.drawLine(70, 0, 70, 51, TFT_DARKCYAN);
+
+
     tft.setTextSize(2);
-    tft.setCursor(0, 0);
-    tft.setTextColor(0x4810);
-    tft.println(F("Status:"));
-    tft.setCursor(0, 20);
-    tft.println(F("Count:"));
-    tft.setCursor(0, 40);
-    tft.println(F("Time:"));
-    delay(3000);
+    tft.setCursor(2, 2);
+    tft.setTextColor(TFT_DARKCYAN);
+    tft.println(F("stat:"));
+    tft.setCursor(2, 19);
+    tft.println(F("coun:"));
+    tft.setCursor(2, 36);
+    tft.println(F("time:"));
+
+    tft.setTextSize(1);
+    tft.setCursor(2, 53);
+    tft.println(F("plant care started"));
+
+
+    tft.fillScreen(TFT_BLACK);
+
+    // 状态显示界面2
+//    tft.pushImage()
+
 
     // 休息时间
     delay(1000 * 2);
