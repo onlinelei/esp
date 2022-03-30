@@ -1,9 +1,19 @@
 #ifndef __FONT_H
 #define __FONT_H
 
-#include <avr/pgmspace.h>
 
-const unsigned char image[] PROGMEM ={
+#include <pgmspace.h>  // PROGMEM support header
+
+#if defined(__AVR__)
+#include <avr/pgmspace.h>
+#elif defined(__PIC32MX__)
+#define PROGMEM
+#elif defined(__arm__)
+#define PROGMEM
+#endif
+
+
+const unsigned short image[] PROGMEM ={
 0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,
 0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XFF,0XBE,0XF7,0X7D,0XEF,
 0XBA,0XD6,0XB6,0XB5,0XF3,0X9C,0XB2,0X94,0XB3,0X9C,0XB2,0X94,0X34,0XA5,0XF7,0XBD,
@@ -208,7 +218,7 @@ const unsigned char image[] PROGMEM ={
 
 
 /****************************************32*32�ĵ���************************************/
-const unsigned char Hzk32[] PROGMEM ={			  
+const unsigned short Hzk32[] PROGMEM ={
 
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x80,0x00,0x00,0x00,0x80,0x01,0x00,
 0x00,0x80,0x01,0x00,0x00,0x80,0x01,0x00,0x00,0x80,0x01,0x00,0x00,0x80,0x01,0x00,
