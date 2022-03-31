@@ -4,3 +4,6 @@
 [submodule "demo/ESP32-PicoDK"]
 	path = demo/ESP32-PicoDK
 	url = https://github.com/peng-zhihui/ESP32-PicoDK.git
+[submodule "demo/HoloCubic"]
+	path = demo/HoloCubic
+	url = https://github.com/peng-zhihui/HoloCubic.git

@@ -151,21 +151,27 @@ void loop() {
 
     // 状态显示界面2
 //    tft.pushImage()
-    tft.pushImage(0,0,40, 40, image);
-    tft.pushImage(60,0,32, 32, Hzk32);
+    tft.pushImage(4,4,40, 40, image);
+    tft.pushImage(60,0,31, 31, Hzk32);
 
-//    showImage(0,0,40, 40, image);
+    delay(1000 * 2);
+    tft.fillScreen(TFT_BLACK);
+    showImage(4,4,40, 40, image);
 
 
     delay(1000 * 2);
     tft.fillScreen(TFT_BLACK);
+    showImage(60,6,32, 32, Hzk32);
 
-    tft.pushImage(0,0,300, 300, EagleEye);
+    delay(1000 * 2);
+    tft.fillScreen(TFT_BLACK);
+
+    tft.pushImage(0,0,299, 299, EagleEye);
 
 
     delay(1000 * 2);
     tft.fillScreen(TFT_BLACK);
-    tft.drawBitmap()
+//    tft.drawBitmap()
 
     delay(1000 * 2);
 }
