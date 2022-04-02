@@ -21,10 +21,6 @@ TFT_eSprite clk = TFT_eSprite(&tft);
 Thread updateStatus_thread = Thread();
 //创建电机驱动线程
 Thread motor_thread = Thread();
-//创建恢复WIFI链接
-//Thread reflash_openWifi = Thread();
-//创建动画绘制线程
-//Thread reflash_Animate = Thread();
 
 //创建协程池
 StaticThreadController<2> controller(&updateStatus_thread, &motor_thread);
@@ -34,7 +30,7 @@ WiFiUDP Udp;
 unsigned int localPort = 8000;
 
 // NTP服务器参数
-static const char ntpServerName[] = "ntp6.aliyun.com";
+static const char ntpServerName[] = "ntp1.aliyun.com";
 const int timeZone = 8; //东八区
 time_t currentTime = 0;       //显示时间显示记录
 
@@ -107,7 +103,6 @@ void updateStatus() {
     tft.setCursor(62, 19);
     tft.print(F(" 100"));
 
-
     tft.setTextSize(1);
     tft.setCursor(2, 53);
     tft.println(F("running ..."));
@@ -129,35 +124,20 @@ void updateTime() {
     tft.print(minute());
     tft.print(":");
     tft.print(second());
-    String time = year() + " " + hour();
 
-
-    clk.setColorDepth(8);
-
-    clk.createSprite(97, 15); //创建窗口
-    clk.fillSprite(0x0000);     //填充率
-
-    clk.setTextDatum(CC_DATUM);                      //设置文本数据
-    clk.setTextColor(TFT_DARKCYAN, 0x0000);
-    clk.drawString("Connecting to WiFi......", 0, 0, 1);
-    clk.setTextColor(TFT_WHITE, 0x0000);
-    clk.drawRightString(Version, 180, 60, 2);
-    clk.pushSprite(20, 120); //窗口位置
-
-    // clk.setTextDatum(CC_DATUM);
-    // clk.setTextColor(TFT_WHITE, 0x0000);
-    // clk.pushSprite(130,180);
-
-    clk.deleteSprite();
-    loadNum += 1;
-    delay(delayTime);
 }
 
 void updateMotor() {
-    if (second() == 0) {
-        digitalWrite(MOTOR_PIN, HIGH);
-    } else if (second() == 30) {
-        digitalWrite(MOTOR_PIN, LOW);
+    if (hour() < 9 || hour() > 21) {
+        return;
+    }
+
+    if (minute() == 0) {
+        if (second() > 20) {
+            digitalWrite(MOTOR_PIN, LOW);
+        } else {
+            digitalWrite(MOTOR_PIN, HIGH);
+        }
     }
 }
 
