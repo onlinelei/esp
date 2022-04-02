@@ -3,62 +3,89 @@
 
 #include <Arduino.h>
 #include <TFT_eSPI.h>
-#include "font.h"
-#include "jpeg4.h"
-#include "Free_Fonts.h" // Include the header file attached to this sketch
+#include <EEPROM.h>
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+#include <TimeLib.h>
+#include <Thread.h>                 //协程
+
 
 int a = 0;
 // GPIO4 控制电机 mos 管
 int MOTOR_PIN = 4;
+
+// EEPROM参数存储地址位
+int BL_addr = 1;    //被写入数据的EEPROM地址编号  1亮度
+int Ro_addr = 2;    //被写入数据的EEPROM地址编号  2 旋转方向
+int DHT_addr = 3;   // 3 DHT使能标志位
+int CC_addr = 10;   //被写入数据的EEPROM地址编号  10城市
+int wifi_addr = 30; //被写入数据的EEPROM地址编号  20wifi-ssid-psw
+
+// NTP服务器参数
+static const char ntpServerName[] = "ntp6.aliyun.com";
+const int timeZone = 8; //东八区
+time_t currentTime = 0;       //显示时间显示记录
+
+
 TFT_eSPI tft = TFT_eSPI();
-
-#define PI_BUF_SIZE 128
-void showImage(int32_t x, int32_t y, int32_t w, int32_t h, const uint16_t *data){
-    int32_t dx = 0;
-    int32_t dy = 0;
-    int32_t dw = w;
-    int32_t dh = h*2;
-
-    if (x < 0) { dw += x; dx = -x; x = 0; }
-    if (y < 0) { dh += y; dy = -y; y = 0; }
-
-    if (dw < 1 || dh < 1) return;
+WiFiUDP Udp;
+unsigned int localPort = 8000;
 
 
-    data += dx + dy * w;
+const int NTP_PACKET_SIZE = 48;     // NTP时间在消息的前48字节中
+byte packetBuffer[NTP_PACKET_SIZE]; // buffer to hold incoming & outgoing packets
+// 向NTP服务器发送请求
+void sendNTPpacket(IPAddress &address) {
 
-    uint16_t  buffer[PI_BUF_SIZE];
-    uint16_t* pix_buffer = buffer;
-    uint16_t  high,low;
+    // set all bytes in the buffer to 0
+    memset(packetBuffer, 0, NTP_PACKET_SIZE);
+    // Initialize values needed to form NTP request
+    // (see URL above for details on the packets)
+    packetBuffer[0] = 0b11100011; // LI, Version, Mode
+    packetBuffer[1] = 0;          // Stratum, or type of clock
+    packetBuffer[2] = 6;          // Polling Interval
+    packetBuffer[3] = 0xEC;       // Peer Clock Precision
+    // 8 bytes of zero for Root Delay & Root Dispersion
+    packetBuffer[12] = 49;
+    packetBuffer[13] = 0x4E;
+    packetBuffer[14] = 49;
+    packetBuffer[15] = 52;
+    // all NTP fields have been given values, now
+    // you can send a packet requesting a timestamp:
+    Udp.beginPacket(address, 123); // NTP requests are to port 123
+    Udp.write(packetBuffer, NTP_PACKET_SIZE);
+    Udp.endPacket();
+}
 
-    tft.setWindow(x, y, x + dw - 1, y + dh - 1);
+time_t getNtpTime() {
+    IPAddress ntpServerIP; // NTP server's ip address
 
-    // Work out the number whole buffers to send
-    uint16_t nb = (dw * dh) / (2 * PI_BUF_SIZE);
-
-    // Fill and send "nb" buffers to TFT
-    for (int32_t i = 0; i < nb; i++) {
-        for (int32_t j = 0; j < PI_BUF_SIZE; j++) {
-            high = pgm_read_word(&data[(i * 2 * PI_BUF_SIZE) + 2 * j + 1]);
-            low = pgm_read_word(&data[(i * 2 * PI_BUF_SIZE) + 2 * j ]);
-            pix_buffer[j] = (high<<8)+low;
+    while (Udp.parsePacket() > 0); // discard any previously received packets
+    // Serial.println("Transmit NTP Request");
+    //  get a random server from the pool
+    WiFi.hostByName(ntpServerName, ntpServerIP);
+    // Serial.print(ntpServerName);
+    // Serial.print(": ");
+    // Serial.println(ntpServerIP);
+    sendNTPpacket(ntpServerIP);
+    uint32_t beginWait = millis();
+    while (millis() - beginWait < 1500) {
+        int size = Udp.parsePacket();
+        if (size >= NTP_PACKET_SIZE) {
+            Serial.println("Receive NTP Response");
+            Udp.read(packetBuffer, NTP_PACKET_SIZE); // read packet into the buffer
+            unsigned long secsSince1900;
+            // convert four bytes starting at location 40 to a long integer
+            secsSince1900 = (unsigned long) packetBuffer[40] << 24;
+            secsSince1900 |= (unsigned long) packetBuffer[41] << 16;
+            secsSince1900 |= (unsigned long) packetBuffer[42] << 8;
+            secsSince1900 |= (unsigned long) packetBuffer[43];
+            // Serial.println(secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR);
+            return secsSince1900 - 2208988800UL + timeZone * SECS_PER_HOUR;
         }
-        tft.pushPixels(pix_buffer, PI_BUF_SIZE);
     }
-
-    // Work out number of pixels not yet sent
-    uint16_t np = (dw * dh) % (2 * PI_BUF_SIZE);
-
-    // Send any partial buffer left over
-    if (np) {
-        for (int32_t i = 0; i < np; i++)
-        {
-            high = pgm_read_word(&data[(nb * 2 * PI_BUF_SIZE) + 2 * i + 1]);
-            low = pgm_read_word(&data[(nb * 2 * PI_BUF_SIZE) + 2 * i ]);
-            pix_buffer[i] = (high<<8)+low;
-        }
-        tft.pushPixels(pix_buffer, np);
-    }
+    Serial.println("No NTP Response :-(");
+    return 0; // 无法获取时间时返回0
 }
 
 
@@ -91,16 +118,66 @@ void setup() {
     tft.setCursor(70, 50);
     tft.setTextColor(TFT_DARKGREEN);
     tft.println(F("Version: 1.0"));
-
     delay(300);
 
     for (int i = 0; i < 70; ++i) {
         tft.setCursor(10 + i * 2, 70);
         tft.println(F(">"));
-        delay(100);
+        delay(30);
     }
 
     tft.fillScreen(TFT_BLACK);
+
+    // 连接wifi
+    char wiFiName[32] = "Mi";
+    char wiFiPass[64] = "12345678";
+
+
+    WiFi.begin(wiFiName, wiFiPass);
+    tft.setTextSize(2);
+    tft.setCursor(30, 35);
+    tft.print("connect wifi:");
+    tft.println(wiFiName);
+
+    Serial.print("connect wifi:");
+    Serial.println(wiFiName);
+    int i = 0;
+    while (WiFi.status() != WL_CONNECTED && i < 30) {
+        tft.setCursor(10 + i * 2, 70);
+        tft.println(F("."));
+        delay(1000);
+        i++;
+    }
+
+    tft.fillScreen(TFT_BLACK);
+    if (WiFi.status() == WL_CONNECTED) {
+        tft.setTextSize(1);
+        tft.setCursor(0, 0);
+        tft.print("IP:");
+        tft.println(WiFi.localIP());
+        delay(1000);
+        tft.println("UDP START ...");
+        delay(1000);
+        Udp.begin(localPort);
+        tft.println("SYNC TIME ...");
+        delay(1000);
+        setSyncProvider(getNtpTime);
+        setSyncInterval(300);
+        currentTime = now();
+        tft.print("TIME LONG:");
+        tft.println(currentTime);
+        delay(1000);
+
+        tft.print("TIME:");
+        tft.print(year());
+        tft.print(" ");
+        tft.print(hour());
+        tft.print(":");
+        tft.print(minute());
+        tft.print(":");
+        tft.print(minute());
+        delay(5000);
+    }
 }
 
 
@@ -151,27 +228,9 @@ void loop() {
 
     // 状态显示界面2
 //    tft.pushImage()
-    tft.pushImage(4,4,40, 40, image);
-    tft.pushImage(60,0,31, 31, Hzk32);
-
-    delay(1000 * 2);
-    tft.fillScreen(TFT_BLACK);
-    showImage(4,4,40, 40, image);
-
-
-    delay(1000 * 2);
-    tft.fillScreen(TFT_BLACK);
-    showImage(60,6,32, 32, Hzk32);
-
-    delay(1000 * 2);
-    tft.fillScreen(TFT_BLACK);
-
-    tft.pushImage(0,0,299, 299, EagleEye);
-
-
-    delay(1000 * 2);
-    tft.fillScreen(TFT_BLACK);
-//    tft.drawBitmap()
 
     delay(1000 * 2);
 }
+
+
+
