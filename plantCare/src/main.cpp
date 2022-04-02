@@ -8,32 +8,39 @@
 #include <WiFiUdp.h>
 #include <TimeLib.h>
 #include <Thread.h>                 //协程
+#include <StaticThreadController.h> //协程控制
 
 
-int a = 0;
 // GPIO4 控制电机 mos 管
 int MOTOR_PIN = 4;
 
-// EEPROM参数存储地址位
-int BL_addr = 1;    //被写入数据的EEPROM地址编号  1亮度
-int Ro_addr = 2;    //被写入数据的EEPROM地址编号  2 旋转方向
-int DHT_addr = 3;   // 3 DHT使能标志位
-int CC_addr = 10;   //被写入数据的EEPROM地址编号  10城市
-int wifi_addr = 30; //被写入数据的EEPROM地址编号  20wifi-ssid-psw
+TFT_eSPI tft = TFT_eSPI();
+TFT_eSprite clk = TFT_eSprite(&tft);
+
+//创建时间更新函数线程
+Thread updateStatus_thread = Thread();
+//创建电机驱动线程
+Thread motor_thread = Thread();
+//创建恢复WIFI链接
+//Thread reflash_openWifi = Thread();
+//创建动画绘制线程
+//Thread reflash_Animate = Thread();
+
+//创建协程池
+StaticThreadController<2> controller(&updateStatus_thread, &motor_thread);
+
+
+WiFiUDP Udp;
+unsigned int localPort = 8000;
 
 // NTP服务器参数
 static const char ntpServerName[] = "ntp6.aliyun.com";
 const int timeZone = 8; //东八区
 time_t currentTime = 0;       //显示时间显示记录
 
-
-TFT_eSPI tft = TFT_eSPI();
-WiFiUDP Udp;
-unsigned int localPort = 8000;
-
-
 const int NTP_PACKET_SIZE = 48;     // NTP时间在消息的前48字节中
 byte packetBuffer[NTP_PACKET_SIZE]; // buffer to hold incoming & outgoing packets
+
 // 向NTP服务器发送请求
 void sendNTPpacket(IPAddress &address) {
 
@@ -88,6 +95,95 @@ time_t getNtpTime() {
     return 0; // 无法获取时间时返回0
 }
 
+void updateStatus() {
+    tft.fillRect(62, 2, 97, 15, TFT_BLACK);
+    tft.fillRect(62, 19, 97, 15, TFT_BLACK);
+    tft.fillRect(2, 53, 157, 26, TFT_BLACK);
+
+    tft.setTextSize(2);
+    tft.setCursor(62, 2);
+    tft.print(F(" OK"));
+
+    tft.setCursor(62, 19);
+    tft.print(F(" 100"));
+
+
+    tft.setTextSize(1);
+    tft.setCursor(2, 53);
+    tft.println(F("running ..."));
+    tft.println(F("im ok !"));
+    tft.print(F("ip address:"));
+    tft.println(WiFi.localIP());
+}
+
+void updateTime() {
+    tft.fillRect(62, 36, 97, 15, TFT_BLACK);
+    tft.setTextSize(1);
+    tft.setCursor(62, 40);
+    tft.print(year());
+    tft.print(" ");
+    tft.print(hour());
+    tft.print(":");
+    tft.print(minute());
+    tft.print(":");
+    tft.print(minute());
+    tft.print(":");
+    tft.print(second());
+    String time = year() + " " + hour();
+
+
+    clk.setColorDepth(8);
+
+    clk.createSprite(97, 15); //创建窗口
+    clk.fillSprite(0x0000);     //填充率
+
+    clk.setTextDatum(CC_DATUM);                      //设置文本数据
+    clk.setTextColor(TFT_DARKCYAN, 0x0000);
+    clk.drawString("Connecting to WiFi......", 0, 0, 1);
+    clk.setTextColor(TFT_WHITE, 0x0000);
+    clk.drawRightString(Version, 180, 60, 2);
+    clk.pushSprite(20, 120); //窗口位置
+
+    // clk.setTextDatum(CC_DATUM);
+    // clk.setTextColor(TFT_WHITE, 0x0000);
+    // clk.pushSprite(130,180);
+
+    clk.deleteSprite();
+    loadNum += 1;
+    delay(delayTime);
+}
+
+void updateMotor() {
+    if (second() == 0) {
+        digitalWrite(MOTOR_PIN, HIGH);
+    } else if (second() == 30) {
+        digitalWrite(MOTOR_PIN, LOW);
+    }
+}
+
+void statusPage() {
+    tft.drawLine(0, 0, 0, 80, TFT_DARKCYAN);
+    tft.drawLine(0, 0, 159, 0, TFT_DARKCYAN);
+    tft.drawLine(159, 0, 159, 79, TFT_DARKCYAN);
+    tft.drawLine(0, 79, 159, 79, TFT_DARKCYAN);
+
+    tft.drawLine(0, 17, 159, 17, TFT_DARKCYAN);
+    tft.drawLine(0, 34, 159, 34, TFT_DARKCYAN);
+    tft.drawLine(0, 51, 159, 51, TFT_DARKCYAN);
+    tft.drawLine(60, 0, 60, 51, TFT_DARKCYAN);
+
+
+    tft.setTextSize(2);
+    tft.setCursor(2, 2);
+    tft.setTextColor(TFT_DARKCYAN);
+    tft.println(F("stat:"));
+    tft.setCursor(2, 19);
+    tft.println(F("coun:"));
+    tft.setCursor(2, 36);
+    tft.println(F("time:"));
+    updateStatus();
+}
+
 
 void setup() {
     // 设置串口速率
@@ -104,7 +200,6 @@ void setup() {
     tft.setRotation(3);
     tft.fillScreen(TFT_BLACK);
     tft.setTextSize(1);
-    tft.setTextColor(TFT_GREEN);
     tft.setCursor(0, 0);
 
     // 开机显示
@@ -134,37 +229,34 @@ void setup() {
 
 
     WiFi.begin(wiFiName, wiFiPass);
-    tft.setTextSize(2);
-    tft.setCursor(30, 35);
-    tft.print("connect wifi:");
+    tft.setTextSize(1);
+    tft.setCursor(0, 0);
+    tft.setTextColor(TFT_DARKCYAN);
+    tft.print(F("wifi name:"));
     tft.println(wiFiName);
+    tft.print(F("connect wifi ."));
 
-    Serial.print("connect wifi:");
-    Serial.println(wiFiName);
     int i = 0;
     while (WiFi.status() != WL_CONNECTED && i < 30) {
-        tft.setCursor(10 + i * 2, 70);
-        tft.println(F("."));
+        tft.print(F("."));
         delay(1000);
         i++;
     }
 
-    tft.fillScreen(TFT_BLACK);
     if (WiFi.status() == WL_CONNECTED) {
-        tft.setTextSize(1);
-        tft.setCursor(0, 0);
-        tft.print("IP:");
+        tft.println(F(""));
+        tft.print(F("IP:"));
         tft.println(WiFi.localIP());
         delay(1000);
-        tft.println("UDP START ...");
+        tft.println(F("UDP START ..."));
         delay(1000);
         Udp.begin(localPort);
-        tft.println("SYNC TIME ...");
+        tft.println(F("SYNC TIME ..."));
         delay(1000);
         setSyncProvider(getNtpTime);
         setSyncInterval(300);
         currentTime = now();
-        tft.print("TIME LONG:");
+        tft.print(F("TIME LONG:"));
         tft.println(currentTime);
         delay(1000);
 
@@ -178,59 +270,23 @@ void setup() {
         tft.print(minute());
         delay(5000);
     }
+
+    tft.fillScreen(TFT_BLACK);
+    // 状态显示界面
+    statusPage();
+
+    updateStatus_thread.setInterval(100); //设置所需间隔 100毫秒
+    updateStatus_thread.onRun(updateTime);
+
+    motor_thread.setInterval(100);
+    motor_thread.onRun(updateMotor);
+
+    controller.run();
 }
 
 
 void loop() {
-
-    // 控制led 会使显示屏幕异常
-//    digitalWrite(BUILTIN_LED, LOW);
-//    delay(200);
-//    digitalWrite(BUILTIN_LED, HIGH);
-
-
-    // 控制电机
-    delay(1000);
-    digitalWrite(MOTOR_PIN, HIGH);
-    // 浇水时间 30 秒
-    delay(1000 * 1);
-    digitalWrite(MOTOR_PIN, LOW);
-
-
-    tft.fillScreen(TFT_BLACK);
-    // 状态显示界面1
-    tft.drawLine(0, 0, 0, 80, TFT_DARKCYAN);
-    tft.drawLine(0, 0, 159, 0, TFT_DARKCYAN);
-    tft.drawLine(159, 0, 159, 79, TFT_DARKCYAN);
-    tft.drawLine(0, 79, 159, 79, TFT_DARKCYAN);
-
-    tft.drawLine(0, 17, 159, 17, TFT_DARKCYAN);
-    tft.drawLine(0, 34, 159, 34, TFT_DARKCYAN);
-    tft.drawLine(0, 51, 159, 51, TFT_DARKCYAN);
-    tft.drawLine(70, 0, 70, 51, TFT_DARKCYAN);
-
-
-    tft.setTextSize(2);
-    tft.setCursor(2, 2);
-    tft.setTextColor(TFT_DARKCYAN);
-    tft.println(F("stat:"));
-    tft.setCursor(2, 19);
-    tft.println(F("coun:"));
-    tft.setCursor(2, 36);
-    tft.println(F("time:"));
-
-    tft.setTextSize(1);
-    tft.setCursor(2, 53);
-    tft.println(F("plant care started"));
-    delay(1000 * 2);
-
-    tft.fillScreen(TFT_BLACK);
-
-    // 状态显示界面2
-//    tft.pushImage()
-
-    delay(1000 * 2);
+    if (controller.shouldRun()) {
+        controller.run();
+    }
 }
-
-
-
