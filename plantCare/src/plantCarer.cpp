@@ -204,8 +204,8 @@ void setup() {
     tft.fillScreen(TFT_BLACK);
 
     // 连接wifi
-    char wiFiName[32] = "Mi";
-    char wiFiPass[64] = "12345678";
+    char wiFiName[32] = "Redmi_016C";
+    char wiFiPass[64] = "87654321";
 
 
     WiFi.begin(wiFiName, wiFiPass);
